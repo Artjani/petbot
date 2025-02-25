@@ -26,6 +26,8 @@ public class GuiController {
     @FXML
     public Label preis;
     @FXML
+    public Label botstatus;
+    @FXML
     public Button speichern;
     @FXML
     public Button loeschen;
@@ -47,7 +49,7 @@ public class GuiController {
     public TextField preisTextfeld;
 
     private Datensauger sauger;
-    private ObservableList<Datensatz> datenliste = FXCollections.observableArrayList();
+    public static ObservableList<Datensatz> datenliste = FXCollections.observableArrayList();
 
     private String csvPfad = "vhs.csv";
     private String txtPfad = "nachricht.txt";
@@ -70,7 +72,6 @@ public class GuiController {
         preisTextfeld.textProperty().addListener((observable, oldValue, newValue) -> {
             validiereEingaben();
         });
-
         markeTextfeld.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 vergleichsdaten.getSelectionModel().clearSelection();
@@ -81,12 +82,10 @@ public class GuiController {
                 vergleichsdaten.getSelectionModel().clearSelection();
             }
         });
-
         vergleichsdaten.getSelectionModel().selectedItemProperty().addListener((observable,oldValue, newValue) -> {
             loeschen.setDisable(newValue == null);
         });
     }
-
     @FXML
     public void speichern() {
         String marke = markeTextfeld.getText();
@@ -103,7 +102,69 @@ public class GuiController {
             speichernInDatei();
         }
     }
+    @FXML
+    public void loeschen() {
+        Datensatz auswahl = vergleichsdaten.getSelectionModel().getSelectedItem();
 
+        if (auswahl != null) {
+            vergleichsdaten.getItems().remove(auswahl);
+            speichernInDatei();
+            vergleichsdaten.getSelectionModel().clearSelection();
+        }
+    }
+    public void dateitesten() throws IOException {
+        Path path = Path.of(csvPfad);
+        String content = Files.readString(path);
+        System.out.println(content);
+
+    }
+    @FXML
+    public void nachrichtOeffnen() {
+
+        File nachricht = new File(txtPfad);
+        if(nachricht.exists()) {
+            try {
+                Desktop.getDesktop().edit(nachricht); // oeffnet mit Standard-Editor
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("nachricht.txt nicht vorhanden");
+        }
+    }
+    @FXML
+    public void starten() {
+        sauger = new Datensauger();
+
+        if(planer == null || planer.isShutdown()) {
+            planer = Executors.newScheduledThreadPool(1);
+            planer.scheduleAtFixedRate(() -> {
+
+                sauger.datenHolen();
+                sauger.beschreibungChecken();
+
+                // wenn nicht soll die nachtricht in das nachrichtenfenster gesteckt und abgeschickt werden
+                // verschickeNachricht()
+            }, 0, 10, TimeUnit.SECONDS); // Wie oft werden Daten geholt, steht hier --------
+        }
+        botstatus.setText("PetBot läuft...");
+        starten.setDisable(true);
+        stoppen.setDisable(false);
+    }
+
+    @FXML
+    public void stoppen() {
+        if(planer != null || !planer.isShutdown()) {
+            planer.shutdownNow();
+        }
+        botstatus.setText("PetBot gestoppt");
+        starten.setDisable(false);
+        stoppen.setDisable(true);
+    }
+
+    public void vergleicheAusgabe() {
+
+    }
     public void speichernInDatei() {
         File datei = new File(csvPfad);
 
@@ -115,7 +176,6 @@ public class GuiController {
             e.printStackTrace();
         }
     }
-
     public void ladenAusDatei() {
         File file = new File(csvPfad);
         if (!file.exists()) {
@@ -142,24 +202,6 @@ public class GuiController {
             e.printStackTrace();
         }
     }
-
-    @FXML
-    public void loeschen() {
-        Datensatz auswahl = vergleichsdaten.getSelectionModel().getSelectedItem();
-
-        if (auswahl != null) {
-            vergleichsdaten.getItems().remove(auswahl);
-            speichernInDatei();
-            vergleichsdaten.getSelectionModel().clearSelection();
-        }
-    }
-    public void dateitesten() throws IOException {
-        Path path = Path.of(csvPfad);
-        String content = Files.readString(path);
-        System.out.println(content);
-
-    }
-
     private void validiereEingaben() {
         String markeText = markeTextfeld.getText();
         String preisText = preisTextfeld.getText();
@@ -174,49 +216,6 @@ public class GuiController {
             preisPasst = false;
         }
         speichern.setDisable(!(markePasst && preisPasst));
-    }
-    @FXML
-    public void nachrichtOeffnen() {
-
-        File nachricht = new File(txtPfad);
-        if(nachricht.exists()) {
-            try {
-                Desktop.getDesktop().edit(nachricht); // oeffnet mit Standard-Editor
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("nachricht.txt nicht vorhanden");
-        }
-    }
-    @FXML
-    public void starten() {
-        sauger = new Datensauger();
-
-        if(planer == null || planer.isShutdown()) {
-            planer = Executors.newScheduledThreadPool(1);
-            planer.scheduleAtFixedRate(() -> {
-
-                sauger.datenHolen();
-                System.out.println(".");
-            }, 0, 2, TimeUnit.MINUTES);
-        }
-        starten.setDisable(true);
-        stoppen.setDisable(false);
-    }
-
-    @FXML
-    public void stoppen() {
-        if(planer != null || !planer.isShutdown()) {
-            planer.shutdownNow();
-            System.out.println("------------STOP------------");
-        }
-        starten.setDisable(false);
-        stoppen.setDisable(true);
-    }
-
-    public void vergleicheDaten() {
-
     }
 }
 

@@ -15,29 +15,29 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         try {
-            URL location = GuiController.class.getResource("GuiFenster.fxml");
-            FXMLLoader loader = new FXMLLoader(location);
-            Parent root = loader.load() ;
-//            Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("/petbotgroupid/petbot/GuiFenster.fxml"));
-
+            Parent root = loadRoot();
             Scene scene = new Scene(root,600,400);
             scene.getStylesheets().add(GuiController.class.getResource("style.css").toExternalForm());
-//			System.out.println(GuiController.class.getResource("AJP-Pixellogo.PNG"));
-			Image logo = new Image(GuiController.class.getResource("AJP-Pixellogo.PNG").toExternalForm());
-            primaryStage.setTitle("Για τον ελληνικό μου αδελφό!"); // "Für meinen griechischen Bruder!"
-//			primaryStage.getIcons().add(logo);
-            primaryStage.setScene(scene);
-            primaryStage.show();
+            setStage(primaryStage, scene);
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
 
+    private Parent loadRoot() throws Exception {
+        URL location = GuiController.class.getResource("GuiFenster.fxml");
+        FXMLLoader loader = new FXMLLoader(location);
+        return loader.load() ;
+    }
+
+    private void setStage(Stage primaryStage, Scene scene){
+        Image logo = new Image(GuiController.class.getResource("AJP-Pixellogo.PNG").toExternalForm());
+        primaryStage.setTitle("Για τον ελληνικό μου αδελφό!"); // "Für meinen griechischen Bruder!"
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
     public static void main(String[] args) {
-
-        //TODO: .jar muss noch geteste werden, dazu pfade ändern!
-        // auch hier "/application/GuiFenster.fxml", "/application/application.css", "/application/AJP-Pixellogo.PNG"
-
 
         launch(args);
     }

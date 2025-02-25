@@ -2,12 +2,12 @@ module petbotgroupid.petbot {
     requires javafx.controls;
     requires javafx.fxml;
 
-    requires org.controlsfx.controls;
-    requires com.dlsc.formsfx;
-    requires net.synedra.validatorfx;
-    requires org.kordamp.ikonli.javafx;
     requires org.jsoup;
+    requires jakarta.mail;
     requires java.desktop;
+    requires htmlunit;
+    requires org.seleniumhq.selenium.chrome_driver;
+    requires io.github.bonigarcia.webdrivermanager;
 
     opens petbotgroupid.petbot to javafx.fxml;
     exports petbotgroupid.petbot;
